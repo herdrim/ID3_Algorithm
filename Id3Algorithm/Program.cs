@@ -7,8 +7,8 @@ namespace Id3Algorithm
     {
         static void Main(string[] args)
         {
-            //DataPreprocessingService dps = new DataPreprocessingService(@".\data.csv", 3, "?");
-            DecisionTreeBuilder dtb = new DecisionTreeBuilder();
+            DataPreprocessingService dps = new DataPreprocessingService(@".\data.csv", 9, "?");
+            DecisionTreeBuilder dtb = new DecisionTreeBuilder(dps);
             dtb.BuildTree();
             
         }

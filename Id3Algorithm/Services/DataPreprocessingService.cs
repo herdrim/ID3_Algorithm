@@ -78,12 +78,12 @@ namespace Id3Algorithm.Services
                     {
                         // Uzupełnianie brakujących danych
                         double avg = column.Where(x => x > double.MinValue).Sum() / column.Count(x => x > double.MinValue);
-                        column.Where(x => x <= double.MinValue).ToList().ForEach(x => x = avg);
+                        column = column.Select(x => x == double.MinValue ? avg : x);
                     }
 
                     int distinctElements = column.Distinct().Count();
                     // Tworzenie przedziałów
-                    var intervals = CreateIntervals(column.ToList(), distinctElements < 10 ? distinctElements : 10);
+                    var intervals = CreateIntervals(column.ToList(), 10);
                     formattedColumn = new int[column.Count()];
 
                     // Przekształcanie liczb na skale od 1 do 10
@@ -98,7 +98,7 @@ namespace Id3Algorithm.Services
                         {
                             Console.WriteLine("Błąd podczas wyszukiwania przedziału dla liczby. {0}", ex.Message);
                         }
-                        formattedColumn[j] = val;
+                        formattedColumn[j] = (int)column.ElementAt(j); //val;
                     }                    
                 }
 
@@ -123,36 +123,17 @@ namespace Id3Algorithm.Services
         private double[] CreateIntervals(List<double> data, int bins)
         {
             double[] intervals = new double[bins];
-            if (data.Count > bins)
+            double all = data.Max() - data.Min() + 1;
+            double interval = all / bins;
+
+            intervals[0] = double.MinValue;
+            double prevVal = data.Min();
+            for (int i = 1; i < intervals.Length; i++)
             {
-                intervals[0] = double.MinValue;
-                data.Sort();
-                double toOneBin = data.Count / (double)bins;
-                int allElements = 0;
-                int interval = 1;
-
-                for (int i = 0; i < data.Count;)
-                {
-                    if (i < (int)toOneBin)
-                    {
-                        allElements++;
-                        int j = i + 1;
-                        while (j < data.Count && data.ElementAt(j) == data.ElementAt(i))
-                        {
-                            allElements++;
-                            j++;                                
-                        }
-                        i = j;
-                    }
-                    else
-                    {
-                        intervals[interval] = data[i - 1];
-
-                        toOneBin = allElements + (data.Count - i) / (double)(bins - interval);                   
-                        interval++;                        
-                    }
-                }
+                intervals[i] = prevVal + interval;
+                prevVal = intervals[i];
             }
+
             return intervals;
         }
     }
