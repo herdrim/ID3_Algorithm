@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Id3Algorithm": {
+      "commandName": "Project",
+      "commandLineArgs": "d C:\\Dokumenty\\Apps\\Id3_Algorithm\\Id3Algorithm\\bin\\Debug\\netcoreapp3.1\\data.data C:\\Dokumenty\\Apps\\Id3_Algorithm\\Id3Algorithm\\bin\\Debug\\netcoreapp3.1\\testData.csv ,"
+    }
+  }
+}

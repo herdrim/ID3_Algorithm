@@ -60,12 +60,14 @@ namespace Id3Algorithm.Services
             }
         }
 
-        public void BuildTree()
+        public TreeNodeModel BuildTree()
         {            
             
             var entropyTable = CreateEntropyTable(_data);
             int selectedAttr = GetSelectedAttributeByEntropyTable(entropyTable);
             rootNode = CreateRootNode(selectedAttr);
+
+            return rootNode;
         }
 
         private TreeNodeModel CreateSubNode(TreeNodeModel parent, int[][] data)
@@ -107,7 +109,7 @@ namespace Id3Algorithm.Services
                         currentNode.Node.Attribute = selectedAttr;
                         currentNode.Node.Decision = null;
 
-                        var children = new Dictionary<int, TreeNodeModel>();
+                        var children = new List<ChildNodeModel>();// new Dictionary<int, TreeNodeModel>();
                         var values = currentNode.UpdatedData.Where(x => x[0] != -1).Select(x => x[selectedAttr]).ToArray();
                         var distinctValues = values.Distinct();
                         if (distinctValues.Count() > 1)
@@ -133,7 +135,11 @@ namespace Id3Algorithm.Services
                                 {
                                     Parent = currentNode.Node
                                 };
-                                children.Add(distinctVal, subNode);
+                                children.Add(new ChildNodeModel() 
+                                { 
+                                    Key = distinctVal, 
+                                    Child = subNode 
+                                });
                                 nodesToProcess.Add(new TreeNodeProcessModel()
                                 {
                                     Node = subNode,
@@ -144,10 +150,14 @@ namespace Id3Algorithm.Services
                         else
                         {
                             var groupedDecisions = decisions.GroupBy(x => x).Select(x => new { key = x.Key, count = x.Count() });
-                            children.Add(distinctValues.FirstOrDefault(), new TreeNodeModel()
+                            children.Add(new ChildNodeModel()
                             {
-                                Parent = currentNode.Node,
-                                Decision = groupedDecisions.FirstOrDefault(x => x.count == groupedDecisions.Max(x => x.count)).key
+                                Key = distinctValues.FirstOrDefault(),
+                                Child = new TreeNodeModel()
+                                {
+                                    Parent = currentNode.Node,
+                                    Decision = groupedDecisions.FirstOrDefault(x => x.count == groupedDecisions.Max(x => x.count)).key
+                                }
                             });
                         }
                         currentNode.Node.ChildNodes = children;
@@ -168,7 +178,7 @@ namespace Id3Algorithm.Services
                 Parent = null
             };
 
-            var children = new Dictionary<int, TreeNodeModel>();
+            var children = new List<ChildNodeModel>();// new Dictionary<int, TreeNodeModel>();
             var values = _data.Select(x => x[attrId]).ToArray();
             var distinctValues = values.Distinct();
 
@@ -190,7 +200,11 @@ namespace Id3Algorithm.Services
                     updatedData[i] = tmpData;
 
                 }
-                children.Add(distinctVal, CreateSubNode(rootNode, updatedData));
+                children.Add(new ChildNodeModel()
+                {
+                    Key = distinctVal,
+                    Child = CreateSubNode(rootNode, updatedData)
+                });
                 
             }
             rootNode.ChildNodes = children;
