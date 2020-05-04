@@ -19,20 +19,24 @@ namespace Id3Algorithm
                 if (args.Length >= 5)
                      dataSeparator = args[4];
 
-
+                Console.WriteLine("Tworzenie drzewa rozpoczęte");
                 DataPreprocessingService dps = new DataPreprocessingService(dataPath, 9, dataMissingValueCharacter, dataSeparator);
                 DecisionTreeBuilder dtb = new DecisionTreeBuilder(dps);
                 var dataToSave = dtb.BuildTree();
                 DataSerializationService.SaveTreeToBinary(pathToSaveTree, dataToSave);
+                Console.WriteLine("Tworzenie drzewa zakończone pomyślnie");
             }
             else if (type == RunType.DecisionMaking && args.Length >= 3)
             {
+                Console.WriteLine("Podejmowanie decyzji rozpoczęte");
                 string pathToReadTree = args[1];
-                List<int[]> dataToMakeDecision = DataSerializationService.GetCasesToMakeDecision(args[2], args[3]);
+                List<int[]> dataToMakeDecision = DataSerializationService.GetCasesToMakeDecision(args[2], args.Length > 3 ? args[3] : ",");
 
                 var data = DataSerializationService.ReadTreeFromBinary(pathToReadTree);
                 DecisionMakerService dms = new DecisionMakerService(data);
                 dms.MakeDecisions(dataToMakeDecision);
+                Console.WriteLine();
+                Console.WriteLine("Podejmowanie decyzji zakończone");
             }
             else
             {
